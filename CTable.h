@@ -51,11 +51,11 @@ int add_column(Table *self, char *column_name, DataType data_type,
                ConstraintType constrain_type, int nullable,
                void *default_value);
 int add_row(Table *self);
-int insert_row_value(Row *row, char *column_name, void *value);
+int insert_row_value(Table* self,Row *row, char *column_name, void *value);
 int table_truncate(Table *self);
 int table_delete(Table **self);
 
-#ifdef CTABLE_IMPL
+// #ifdef CTABLE_IMPL
 
 int validate_value(DataType type, void *value) {
   switch (type) {
@@ -222,12 +222,47 @@ int table_delete(Table **selfpointer) {
   return 0;
 }
 
-int insert_row_value(Row *row, char *column_name, void *value) {
+
+
+int insert_row_value(Table* self,Row *row, char *column_name, void *value) {
   if (row == NULL) {
     return 1;
   }
+  for(int i=0;i<self->NoOfColumms;i++){
+      Column* col=self->Columns+i;
+      if(strcmp(column_name,col->Name)==0){
+          puts("column name matched");
+          if(validate_value(col->DataType, value)==1){
+              //datatype does not match
+              puts("data type does not match");
+              return 1;
+          }
+          if(row->NoOfColumns==0&&row->ColumnValues==NULL){
+              puts("allocating memory for column values");
+              row->ColumnValues=(Value*)malloc(sizeof(Value)*self->NoOfColumms);
+              if(row->ColumnValues==NULL){
+                  puts("unable to allocate mem for column values");
+                  //unable to allocate memory for ColumnValues
+                  return 1;
+              }
+          }
+          Value* val=(Value*)malloc(sizeof(Value));
+          if(val==NULL){
+              puts("unable to allocate mem for value");
+              //unable to allocate memory for value
+              return 1;
+          }
+          val->Value=value;
+          memcpy(val->Column, col, sizeof(Column));
+          memcpy(row->ColumnValues+i,val,sizeof(Value));
+          free(val);
+          return 0;
+      }
+  }
+  //column_name doesnt match
+  return 1;
 }
 
-#endif
+// #endif
 
 #endif

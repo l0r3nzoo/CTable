@@ -14,6 +14,18 @@ int main() {
     printf("unable to add row\n");
     goto delete;
   }
+
+  for(int i=0;i<table->NoOfRows;i++){
+      for(int j=0;j<table->NoOfColumms;j++){
+          int value=120;
+          printf("inserting value '%d' for row '%d' and column '%s'\n",value,i+1,table->Columns[j].Name);
+          if(insert_row_value(table,&table->Rows[i],table->Columns[j].Name,&value)!=0){
+              puts("unable to insert value");
+          }
+          printf("value of Id at row 1 : %d\n",(int*)table->Rows[i].ColumnValues[j].Value);
+      }
+  }
+
 delete:
   if (table_delete(&table) != 0) {
     puts("unable to delete table");
